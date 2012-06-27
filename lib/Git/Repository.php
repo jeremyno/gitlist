@@ -337,6 +337,24 @@ class Repository
             throw new \RuntimeException('No commit log available');
         }
 
+        $diff = $this->parseDiff($logs);
+        $commit->setDiffs($diff);
+
+        return $commit;
+    }
+
+    public function getBranchDiff($baseBranch, $otherBranch)
+    {
+        $logs = $this->getClient()->run($this, 'diff ' . escapeshellarg("{$baseBranch}..{$otherBranch}"));
+        $logs = explode("\n", $logs);
+        $diff = $this->parseDiff($logs);
+        return $diff;
+    }
+
+    protected function parseDiff($logs)
+    {
+        $diffs = array();
+
         // Read diff logs
         foreach ($logs as $log) {
             if ('diff' === substr($log, 0, 4)) {
@@ -377,13 +395,12 @@ class Repository
             $diff->addLine($log);
         }
 
+
         if (isset($diff)) {
             $diffs[] = $diff;
         }
 
-        $commit->setDiffs($diffs);
-
-        return $commit;
+        return $diffs;
     }
 
     public function getAuthorStatistics()
