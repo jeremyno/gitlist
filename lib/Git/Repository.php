@@ -430,7 +430,15 @@ class Repository
      */
     public function getHead()
     {
-        $file = file_get_contents($this->getPath() . '/.git/HEAD');
+        if (file_exists($this->getPath() . '/.git/HEAD')) {
+          $file = @file_get_contents($this->getPath() . '/.git/HEAD');
+        }
+        else if (file_exists($this->getPath() . '/HEAD')) {
+          $file = @file_get_contents($this->getPath() . '/HEAD');
+        }
+        else  {
+          return 'master';
+        }
         foreach (explode("\n", $file) as $line) {
             $m = array();
             if (preg_match('#ref:\srefs/heads/(.+)#', $line, $m)) {
@@ -524,7 +532,7 @@ class Repository
                 continue;
             }
 
-            preg_match_all("/([a-zA-Z0-9^]{8})[\s]+(.+)[\s]+([0-9]+)\)(.+)/", $log, $match);
+            preg_match_all("/([a-zA-Z0-9^]{8})[\s]+([0-9]+)\)(.+)/", $log, $match);
 
             $current_commit = $match[1][0];
             if ($current_commit != $previous_commit) {
@@ -532,7 +540,7 @@ class Repository
                 $blame[$i] = array('line' => '', 'commit' => $current_commit);
             }
 
-            $blame[$i]['line'] .= PHP_EOL . $match[4][0];
+            $blame[$i]['line'] .= PHP_EOL . $match[3][0];
             $previous_commit = $current_commit;
         }
 

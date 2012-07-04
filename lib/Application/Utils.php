@@ -69,13 +69,13 @@ class Utils
             case 'cpp':
                 return 'clike';
             case 'cs':
-                return 'clike';
+                return 'csharp';
             case 'm':
                 return 'clike';
             case 'mm':
                 return 'clike';
             case 'java':
-                return 'clike';
+                return 'java';
             case 'clj':
                 return 'clojure';
             case 'coffee':
@@ -249,7 +249,7 @@ class Utils
     public function getReadme($repo, $branch = 'master')
     {
         $repository = $this->app['git']->getRepository($this->app['git.repos'] . $repo);
-        $files = $repository->getTree('master')->output();
+        $files = $repository->getTree($branch)->output();
 
         foreach ($files as $fileInfo)
             if (preg_match('/^readme*/i', $fileInfo['name'])) {
