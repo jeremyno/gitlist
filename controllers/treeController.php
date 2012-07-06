@@ -42,29 +42,6 @@ $app->get('{repo}/tree/{branch}/', function($repo, $branch) use($app) {
 })->assert('repo', '[\w-._]+')
   ->assert('branch', '[\w-._]+');
 
-$app->get('{repo}/tree/{base}..{branch}', function($repo, $base, $branch) use($app) {
-    $repository = $app['git']->getRepository($app['git.repos'] . $repo);
-    $diff = $repository->getBranchDiff($base, $branch);
-    $breadcrumbs = $app['utils']->getBreadcrumbs("$repo/");
-
-    // Interim hackery to start to get this working.
-    $commit = new \Git\Commit\Commit();
-    $commit->setDiffs($diff);
-
-    return $app['twig']->render('commit.twig', array(
-        'baseurl'        => $app['baseurl'],
-        'page'           => 'compare',
-        'branch'         => 'master',
-        'repo'           => $repo,
-        'commit'         => $commit,
-    ));
-
-})->assert('repo', '[\w-._]+')
-  ->assert('base', '[\w-._]+')
-  ->assert('branch', '[\w-._]+');
-
-
-
 $app->get('{repo}/tree/{branch}/{tree}/', function($repo, $branch, $tree) use($app) {
     $repository = $app['git']->getRepository($app['git.repos'] . $repo);
     $files = $repository->getTree("$branch:'$tree'/");

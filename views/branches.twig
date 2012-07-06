@@ -1,0 +1,45 @@
+{% extends 'layout.twig' %}
+{% block title %}GitList{% endblock %}
+
+{% block body %}
+{% include 'navigation.twig' %}
+
+<div class="container">
+    <div class="row">
+        <div class="span12">
+            {% include 'branch_menu.twig' %}
+            {% include 'menu.twig' %}
+        </div>
+    </div>
+
+    <ul class="breadcrumb">
+        <li><a href="{{ baseurl }}/{{ repo }}">{{ repo }}</a> <span class="divider">/</span></li>
+        <li>Branches</li>
+    </ul>
+
+    {% if branchesDetail|length <= 0 %}
+        <div class="alert alert-error">No unmerged branches found.</div>
+    {% else %}
+        <table class="table table-striped branch-list">
+            {% for name, branchDetail in branchesDetail %}
+                <tr>
+                    <td>
+                        <h3><a href="{{ baseurl }}/{{ repo }}/tree/{{ name }}">{{ name }}</a></h3>
+                        <a href="{{ baseurl }}/{{ repo }}/commit/{{ branchDetail.getHash }}">{{ branchDetail.getHash }}</a>
+                        {{ branchDetail.getLastMsg }}
+                    </td>
+                    <td class="stats">
+                        {% if branchDetail.getBehind %}{{ branchDetail.getBehind }} behind |{% endif %}
+                        {% if branchDetail.getAhead %}{{ branchDetail.getAhead }} ahead{% endif %}
+                    </td>
+                    <td class="compare"><span class="pull-right"><a class="btn btn-small" href="{{ baseurl }}/{{ repo }}/branches/{{ branch }}...{{ name }}"><i class="icon-list-alt"></i> Compare</a></span></td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+
+    <hr>
+
+    {% include 'footer.twig' %}
+</div>
+{% endblock %}

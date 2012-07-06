@@ -6,6 +6,8 @@ use Git\Commit\Commit;
 use Git\Model\Tree;
 use Git\Model\Blob;
 use Git\Model\Diff;
+use Git\Branch;
+use Git\BranchDiff;
 
 class Repository
 {
@@ -148,10 +150,31 @@ class Repository
      */
     public function getBranches()
     {
-        $branches = $this->getClient()->run($this, "branch");
-        $branches = explode("\n", $branches);
-        $branches = array_filter(preg_replace('/[\*\s]/', '', $branches));
-        
+        return array_keys($this->getBranchesDetail());
+    }
+
+    /**
+     * Show a detailed list of the repository branches
+     * 
+     * @access public
+     * @return array List of branches with name as key
+     */
+    public function getBranchesDetail($no_merge = '')
+    {
+        if ($no_merge) {
+            $arg = '--no-merged=' . escapeshellarg($no_merge);
+        }
+
+        $branches = array();
+        $raw = explode("\n", $this->getClient()->run($this, "branch -v {$arg}"));
+        foreach ($raw as $line) {
+            if (!trim($line)) {
+                continue;
+            }
+            $branch = new Branch($line);
+            $branches[$branch->getName()] = $branch;
+        }
+
         return $branches;
     }
     
@@ -163,12 +186,10 @@ class Repository
      */
     public function getCurrentBranch()
     {
-        $branches = $this->getClient()->run($this, "branch");
-        $branches = explode("\n", $branches);
-        
-        foreach($branches as $branch) {
-            if($branch[0] == '*') {
-                return substr($branch, 2);
+        $branches = $this->getBranchesDetail();
+        foreach ($branches as $name => $branch) {
+            if ($branch->isCurrent()) {
+                return $name;
             }
         }
     }
@@ -343,12 +364,56 @@ class Repository
         return $commit;
     }
 
+    /**
+     * Show the repository commit log between 2 branches
+     * 
+     * @access public
+     * @return array Commit log
+     */
+    protected function getBranchCommits($baseBranch, $otherBranch)
+    {
+        $command = 'log  --pretty=format:\'"%h": {"hash": "%H", "short_hash": "%h", "tree": "%T", "parent": "%P", "author": "%an", "author_email": "%ae", "date": "%at", "commiter": "%cn", "commiter_email": "%ce", "commiter_date": "%ct", "message": "%f"}\' ' . "{$baseBranch}...{$otherBranch}";
+
+        $logs = $this->getClient()->run($this, $command);
+
+        if (empty($logs)) {
+            throw new \RuntimeException('No commit log available');
+        }
+
+        $logs = str_replace("\n", ',', $logs);
+        $logs = json_decode("{ $logs }", true);
+
+        foreach ($logs as $log) {
+            $log['message'] = str_replace('-', ' ', $log['message']);
+            $commit = new Commit;
+            $commit->importData($log);
+            $commits[] = $commit;
+        }
+
+        return $commits;
+    }
+
     public function getBranchDiff($baseBranch, $otherBranch)
     {
-        $logs = $this->getClient()->run($this, 'diff ' . escapeshellarg("{$baseBranch}..{$otherBranch}"));
+        $baseBranch = escapeshellarg($baseBranch);
+        $otherBranch = escapeshellarg($otherBranch);
+
+        $logs = $this->getClient()->run($this, "diff {$baseBranch}...{$otherBranch}");
         $logs = explode("\n", $logs);
         $diff = $this->parseDiff($logs);
-        return $diff;
+
+        $branchDiff = new BranchDiff();
+        $branchDiff->setDiffs($diff);
+
+        $commits = $this->getBranchCommits($baseBranch, $otherBranch);
+        foreach ($commits as $commit) {
+            $date = $commit->getDate();
+            $date = $date->format('m/d/Y');
+            $categorized[$date][] = $commit;
+        }
+        $branchDiff->setCommits($categorized);
+
+        return $branchDiff;
     }
 
     protected function parseDiff($logs)

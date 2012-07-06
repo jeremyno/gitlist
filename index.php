@@ -40,6 +40,7 @@ $app['twig']->addFilter('md5', new Twig_Filter_Function('md5'));
 include 'controllers/indexController.php';
 include 'controllers/treeController.php';
 include 'controllers/blobController.php';
+include 'controllers/branchesController.php';
 include 'controllers/commitController.php';
 include 'controllers/statsController.php';
 include 'controllers/rssController.php';
