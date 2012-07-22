@@ -1,21 +1,11 @@
-{% extends 'layout.twig' %}
+{% extends 'layout_page.twig' %}
+
+{% set page = 'branches' %}
+
 {% block title %}GitList{% endblock %}
 
-{% block body %}
-{% include 'navigation.twig' %}
-
-<div class="container">
-    <div class="row">
-        <div class="span12">
-            {% include 'branch_menu.twig' %}
-            {% include 'menu.twig' %}
-        </div>
-    </div>
-
-    <ul class="breadcrumb">
-        <li><a href="{{ baseurl }}/{{ repo }}">{{ repo }}</a> <span class="divider">/</span></li>
-        <li>Branches</li>
-    </ul>
+{% block content %}
+    {% include 'breadcrumb.twig' with {breadcrumbs: breadcrumbs} %}
 
     {% if branchesDetail|length <= 0 %}
         <div class="alert alert-error">No unmerged branches found.</div>
@@ -39,7 +29,4 @@
     {% endif %}
 
     <hr>
-
-    {% include 'footer.twig' %}
-</div>
 {% endblock %}
