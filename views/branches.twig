@@ -32,7 +32,7 @@
                         {% if branchDetail.getBehind %}{{ branchDetail.getBehind }} behind |{% endif %}
                         {% if branchDetail.getAhead %}{{ branchDetail.getAhead }} ahead{% endif %}
                     </td>
-                    <td class="compare"><span class="pull-right"><a class="btn btn-small" href="{{ baseurl }}/{{ repo }}/branches/{{ branch }}...{{ name }}"><i class="icon-list-alt"></i> Compare</a></span></td>
+                    <td class="compare"><span class="pull-right"><a class="btn btn-small" href="{{ baseurl }}/{{ repo }}/compare/{{ branch }}...{{ name }}"><i class="icon-list-alt"></i> Compare</a></span></td>
                 </tr>
             {% endfor %}
         </table>

@@ -162,6 +162,7 @@ class Repository
      */
     public function getBranchesDetail($no_merge = '')
     {
+        $arg = '';
         if ($no_merge) {
             $arg = '--no-merged=' . escapeshellarg($no_merge);
         }
@@ -402,6 +403,7 @@ class Repository
         $otherBranch = escapeshellarg($otherBranch);
 
         $logs = $this->getClient()->run($this, "diff {$baseBranch}...{$otherBranch}");
+        echo "<pre>command: diff {$baseBranch}...{$otherBranch}\n</pre>";
         $logs = explode("\n", $logs);
         $diff = $this->parseDiff($logs);
 
