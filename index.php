@@ -5,8 +5,7 @@
  * https://github.com/klaussilveira/gitlist
  */
 
-//require 'vendor/autoload.php';
-require_once 'phar://'.__DIR__.'/vendor/silex.phar';
+require 'vendor/autoload.php';
 
 // Load configuration
 $config = new GitList\Config('config.ini');
