@@ -1,58 +1,73 @@
-{% extends 'layout.twig' %}
+{% extends 'layout_page.twig' %}
+
+{% set page = 'commits' %}
+
 {% block title %}GitList{% endblock %}
 
-{% block body %}
-{% include 'navigation.twig' %}
-
-<div class="container">
-    <div class="row">
-        <div class="span12">
-            {% include 'menu.twig' %}
-        </div>
-    </div>
-
-    <ul class="breadcrumb">
-        <li><a href="{{ baseurl }}/{{ repo }}">{{ repo }}</a> <span class="divider">/</span></li>
-        <li>Commit {{ commit.getHash}} </li>
-    </ul>
+{% block content %}
+    {% include 'breadcrumb.twig' with {breadcrumbs: [{dir: "Commit #{commit.hash}", path:''}]} %}
 
     <div class="commit-view">
         <div class="commit-header">
-            <span class="pull-right"><a class="btn btn-small" href="{{ baseurl }}/{{ repo }}/tree/{{ commit.getHash }}/" title="Browse code at this point in history"><i class="icon-list-alt"></i> Browse code</a></span>
-            <h4>{{ commit.getMessage }}</h4>
+            <span class="pull-right"><a class="btn btn-small" href="{{ path('branch', {repo: repo, branch: commit.hash}) }}" title="Browse code at this point in history"><i class="icon-list-alt"></i> Browse code</a></span>
+            <h4>{{ commit.message }}</h4>
         </div>
         <div class="commit-body">
-            <img src="http://gravatar.com/avatar/{{ commit.getAuthor.getEmail | md5 }}?s=32" class="pull-left space-right" />
-            <span><a href="mailto:{{ commit.getAuthor.getEmail }}">{{ commit.getAuthor.getName }}</a> authored in {{ commit.getDate | date('d/m/Y \\a\\t H:i:s') }}<br />Showing {{ commit.getChangedFiles }} changed files</span>
+            <img src="http://gravatar.com/avatar/{{ commit.author.email | md5 }}?s=32" class="pull-left space-right" />
+            <span><a href="mailto:{{ commit.author.email }}">{{ commit.author.name }}</a> authored in {{ commit.date | date('d/m/Y \\a\\t H:i:s') }}<br />Showing {{ commit.changedFiles }} changed files</span>
         </div>
     </div>
 
     <ul class="commit-list">
-        {% for diff in commit.getDiffs %}
-            <li><i class="icon-file"></i> <a href="#{{ loop.index }}">{{ diff.getFile }}</a> <span class="meta pull-right">{{ diff.getIndex }}</span></li>
+        {% for diff in commit.diffs %}
+            <li><i class="icon-file"></i> <a href="#{{ loop.index }}">{{ diff.file }}</a> <span class="meta pull-right">{{ diff.index }}</span></li>
         {% endfor %}
     </ul>
 
-    {% for diff in commit.getDiffs %}
+    {% for diff in commit.diffs %}
     <div class="source-view">
         <div class="source-header">
-            <div class="meta"><a name="{{ loop.index }}">{{ diff.getFile }}</div>
+            <div class="meta"><a name="{{ loop.index }}">{{ diff.file }}</div>
 
             <div class="btn-group pull-right">
-                <a href="{{ baseurl }}/{{ repo }}/blob/{{ commit.getHash }}/{{ diff.getFile }}" class="btn btn-small"><i class="icon-file"></i> View file @ {{ commit.getShortHash }}</a>
+                <a href="{{ path('commits', {repo: repo, branch: commit.hash, file: diff.file}) }}" class="btn btn-small"><i class="icon-list-alt"></i> History</a>
+                <a href="{{ path('blob', {repo: repo, branch: commit.hash, file: diff.file}) }}" class="btn btn-small"><i class="icon-file"></i> View file @ {{ commit.shortHash }}</a>
             </div>
         </div>
-        
+
         <div class="source-diff">
+        <table>
         {% for line in diff.getLines %}
-            <pre{% if line.getType %} class="{{ line.getType }}"{% endif %}>{{ line.getLine }}</pre>
+            <tr>
+                <td class="lineNo">
+                    {% if line.getType != 'chunk' %}
+                        <a name="L{{ loop.index }}R{{ line.getNumOld }}"></a>
+                        <a href="#L{{ loop.index }}L{{ line.getNumOld }}">
+                    {% endif %}
+                    {{ line.getNumOld }}
+                    {% if line.getType != 'chunk' %}
+                        </a>
+                    {% endif %}
+                </td>
+                <td class="lineNo">
+                    {% if line.getType != 'chunk' %}
+                        <a name="L{{ loop.index }}L{{ line.getNumNew }}"></a>
+                        <a href="#L{{ loop.index }}L{{ line.getNumNew }}">
+                    {% endif %}
+                    {{ line.getNumNew }}
+                    {% if line.getType != 'chunk' %}
+                        </a>
+                    {% endif %}
+                </td>
+                <td style="width: 100%">
+                    <pre{% if line.getType %} class="{{ line.getType }}"{% endif %}>{{ line.getLine }}</pre>
+                </td>
+            </tr>
         {% endfor %}
+        </table>
         </div>
     </div>
     {% endfor %}
 
     <hr>
-
-    {% include 'footer.twig' %}
-</div>
 {% endblock %}
