@@ -21,7 +21,7 @@ class BranchesController implements ControllerProviderInterface
                 $branch = $head;
             }
 
-            $path = $repo;
+            $path = '';
             if ($branch != $head) {
               $path . "/{$branch}";
             }
@@ -29,27 +29,26 @@ class BranchesController implements ControllerProviderInterface
             $breadcrumbs = $app['util.view']->getBreadcrumbs($path);
 
             return $app['twig']->render('branches.twig', array(
-                'page'           => 'branches',
+                'branchesDetail' => $repository->getBranchesDetail($branch),
                 'repo'           => $repo,
                 'branch'         => $branch,
-                'branchesDetail' => $repository->getBranchesDetail($branch),
+                'breadcrumbs'    => $breadcrumbs,
                 'branches'       => $repository->getBranches(),
                 'tags'           => $repository->getTags(),
             ));
         })->assert('repo', '[\w-._]+')
-          ->assert('branch', '[\w-._]+')
-          ->bind('branch');
+          ->assert('branch', '[\w-._]+');
 
         $route->get('{repo}/compare/{source}...{target}', $branchesController = function($repo, $source, $target) use ($app) {
             $repository = $app['git']->getRepository($app['git.repos'] . $repo);
             $branchDiff = $repository->getBranchDiff($source, $target);
-            $breadcrumbs = $app['util.view']->getBreadcrumbs("$repo/");
+            $breadcrumbs = $app['util.view']->getBreadcrumbs('');
 
             return $app['twig']->render('branch_diff.twig', array(
-                'page'           => 'branches',
-                'branch'         => $source,
-                'repo'           => $repo,
                 'branchdiff'     => $branchDiff,
+                'repo'           => $repo,
+                'branch'         => $source,
+                'breadcrumbs'    => $breadcrumbs,
                 'branches'       => $repository->getBranches(),
                 'tags'           => $repository->getTags(),
             ));
