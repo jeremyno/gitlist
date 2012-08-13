@@ -6,7 +6,7 @@ use GitList\Component\Git\Commit\Commit;
 use GitList\Component\Git\Model\Tree;
 use GitList\Component\Git\Model\Blob;
 use GitList\Component\Git\Model\Diff;
-use GitList\Component\Git\BranchDiff;
+use GitList\Component\Git\Model\ArbitaryDiff;
 use Symfony\Component\Filesystem\Filesystem;
 
 class Repository
@@ -398,19 +398,27 @@ class Repository
     }
 
     /**
-     * Diffs two branches.
+     * Diffs two arbitary commits.
+     *
+     * @param string $from The source commit/branch for the diff.
+     * @param string $to The target commit/branch for the diff.
+     * @param string $operator The operator to use for the diff. See man git-diff(1).
+     *
+     * @return ArbitaryDiff The diff as an object.
      */
-    public function getBranchDiff($baseBranch, $otherBranch)
+    public function getArbitaryDiff($from, $to, $operator = '...')
     {
         $baseBranch = escapeshellarg($baseBranch);
         $otherBranch = escapeshellarg($otherBranch);
 
-        $logs = $this->getClient()->run($this, "diff {$baseBranch}...{$otherBranch}");
-        $logs = explode("\n", $logs);
-        $diff = $this->parseDiff($logs);
+        $branchDiff = new ArbitaryDiff();
 
-        $branchDiff = new BranchDiff();
-        $branchDiff->setDiffs($diff);
+        $logs = $this->getClient()->run($this, "diff {$baseBranch}...{$otherBranch}");
+        if (strlen(trim($logs))) {
+          $logs = explode("\n", $logs);
+          $diff = $this->parseDiff($logs);
+          $branchDiff->setDiffs($diff);
+        }
 
         $commits = $this->getBranchCommits($baseBranch, $otherBranch);
         foreach ($commits as $commit) {
@@ -430,6 +438,8 @@ class Repository
         // Read diff logs
         $lineNumOld = 0;
         $lineNumNew = 0;
+        echo 'Trace<pre>' . print_r(debug_backtrace(), TRUE) . '</pre>';
+        echo '<pre>' . print_r($logs, TRUE) . '</pre>'; exit;
         foreach ($logs as $log) {
             if ('diff' === substr($log, 0, 4)) {
                 if (isset($diff)) {

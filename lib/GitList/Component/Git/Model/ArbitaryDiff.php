@@ -1,8 +1,8 @@
 <?php
 
-namespace GitList\Component\Git;
+namespace GitList\Component\Git\Model;
 
-class BranchDiff
+class ArbitaryDiff
 {
     protected $commits;
     protected $diffs;
