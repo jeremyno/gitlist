@@ -41,7 +41,7 @@ class BranchesController implements ControllerProviderInterface
 
         $route->get('{repo}/compare/{source}...{target}', $branchesController = function($repo, $source, $target) use ($app) {
             $repository = $app['git']->getRepository($app['git.repos'] . $repo);
-            $branchDiff = $repository->getBranchDiff($source, $target);
+            $branchDiff = $repository->getArbitaryDiff($source, $target);
             $breadcrumbs = $app['util.view']->getBreadcrumbs('');
 
             return $app['twig']->render('branch_diff.twig', array(

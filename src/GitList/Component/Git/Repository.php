@@ -6,6 +6,7 @@ use GitList\Component\Git\Commit\Commit;
 use GitList\Component\Git\Model\Tree;
 use GitList\Component\Git\Model\Blob;
 use GitList\Component\Git\Model\Diff;
+use GitList\Component\Git\Model\Branch;
 use GitList\Component\Git\Model\ArbitaryDiff;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -408,8 +409,8 @@ class Repository
      */
     public function getArbitaryDiff($from, $to, $operator = '...')
     {
-        $baseBranch = escapeshellarg($baseBranch);
-        $otherBranch = escapeshellarg($otherBranch);
+        $baseBranch = escapeshellarg($from);
+        $otherBranch = escapeshellarg($to);
 
         $branchDiff = new ArbitaryDiff();
 
@@ -438,8 +439,6 @@ class Repository
         // Read diff logs
         $lineNumOld = 0;
         $lineNumNew = 0;
-        echo 'Trace<pre>' . print_r(debug_backtrace(), TRUE) . '</pre>';
-        echo '<pre>' . print_r($logs, TRUE) . '</pre>'; exit;
         foreach ($logs as $log) {
             if ('diff' === substr($log, 0, 4)) {
                 if (isset($diff)) {

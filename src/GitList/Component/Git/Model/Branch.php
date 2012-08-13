@@ -1,6 +1,6 @@
 <?php
 
-namespace GitList\Component\Git;
+namespace GitList\Component\Git\Model;
 
 class Branch
 {
