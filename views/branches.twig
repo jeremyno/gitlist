@@ -14,7 +14,7 @@
             {% for name, branchDetail in branchesDetail %}
                 <tr>
                     <td>
-                        <h3><a href="{{ baseurl }}/{{ repo }}/tree/{{ name }}">{{ name }}</a></h3>
+                        <h3><a href="{{ baseurl }}/{{ repo }}/{{ name }}">{{ name }}</a></h3>
                         <a href="{{ baseurl }}/{{ repo }}/commit/{{ branchDetail.getHash }}">{{ branchDetail.getHash }}</a>
                         {{ branchDetail.getLastMsg }}
                     </td>
