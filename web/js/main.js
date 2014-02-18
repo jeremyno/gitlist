@@ -13,26 +13,30 @@ $(function () {
             matchBrackets: true,
             lineWrapping: true,
             readOnly: true,
-            mode: mode
+            mode: mode,
+            lineNumberFormatter: function(ln) {
+                return '<a name="L'+ ln +'"></a><a href="#L'+ ln +'">'+ ln +'</a>';
+            }
         });
     }
 
-    if ($('#readme-content').length) {
-        var converter = new Showdown.converter();
-        $('#readme-content').html(converter.makeHtml($('#readme-content').text()));
+    if ($('#md-content').length) {
+        var converter = new Showdown.converter({extensions: ['table']});
+        $('#md-content').html(converter.makeHtml($('#md-content').text()));
     }
 
     function paginate() {
         var $pager = $('.pager');
+
         $pager.find('.next a').one('click', function (e) {
             e.preventDefault();
-            $(this).css('pointer-events', 'none');
             $.get(this.href, function (html) {
                 $pager.after(html);
                 $pager.remove();
                 paginate();
             });
         });
+
         $pager.find('.previous').remove();
     }
     paginate();
